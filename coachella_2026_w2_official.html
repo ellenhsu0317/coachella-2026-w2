@@ -107,39 +107,90 @@ body{font-family:'Syne',sans-serif;background:var(--sand);color:var(--ink);min-h
 .acard-cnt{font-size:11px;font-weight:700;color:var(--ink-light);min-width:24px;text-align:right;flex-shrink:0}
 .plus-icon{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink-mid);font-size:16px;font-weight:300;pointer-events:none;}
 .acard.checked-me .plus-icon{background:var(--green);border-color:var(--green);color:#fff;font-size:13px;font-weight:700;}
+/* ── TIMELINE: vertical (time↓, stage→) ─── */
 .tl-day-tabs{display:flex;background:var(--sand);border-bottom:1px solid var(--border);padding:0 16px}
 .tl-day-tab{padding:10px 14px;font-size:12px;font-weight:700;color:var(--ink-light);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s}
 .tl-day-tab.on{color:var(--green);border-bottom-color:var(--green)}
-.tl-outer{overflow-x:auto;background:var(--sand-light);-webkit-overflow-scrolling:touch}
-.tl-container{display:flex;min-width:max-content}
-.tl-stage-col{width:88px;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--sand);border-right:1.5px solid var(--border-strong)}
-.tl-stage-hdr-cell{height:32px;border-bottom:1.5px solid var(--border-strong);display:flex;align-items:center;padding:0 10px;font-size:8px;font-weight:800;letter-spacing:2px;color:var(--ink-light);text-transform:uppercase}
-.tl-stage-row{height:68px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:5px}
-.tl-stage-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.tl-stage-name{font-size:9.5px;font-weight:700;color:var(--ink);line-height:1.25}
-.tl-grid{position:relative;flex:1}
-.tl-time-hdr{height:32px;border-bottom:1.5px solid var(--border-strong);position:relative;background:var(--sand)}
-.tl-tick{position:absolute;top:0;height:100%;display:flex;align-items:center;padding-left:4px;pointer-events:none}
-.tl-tick span{font-size:9px;font-weight:700;color:var(--ink-light);white-space:nowrap}
-.tl-rows{position:relative}
-.tl-row-bg{position:absolute;left:0;right:0;border-bottom:1px solid rgba(26,18,8,.04)}
-.tl-vline{position:absolute;top:0;bottom:0;width:1px;background:rgba(26,18,8,.06);pointer-events:none}
-.tl-vline.hr{background:rgba(26,18,8,.1)}
-.tl-sunset{position:absolute;top:0;bottom:0;width:2px;background:var(--amber);z-index:5;pointer-events:none}
-.tl-sunset-lbl{position:absolute;top:2px;left:3px;font-size:8px;font-weight:700;color:var(--amber);white-space:nowrap;background:rgba(237,228,211,.92);padding:1px 4px;border-radius:3px}
-.tl-block{position:absolute;border-radius:7px;cursor:pointer;overflow:hidden;transition:filter .1s,transform .1s;border:2px solid transparent}
-.tl-block:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.tl-block.me-on{border-color:rgba(0,0,0,.2)}
-.tl-block.clash{box-shadow:0 0 0 2.5px #E84A4A}
+
+/* Outer wrapper: overflow-x for stages, overflow-y for time */
+.tl-outer{overflow-x:auto;overflow-y:auto;background:var(--sand-light);-webkit-overflow-scrolling:touch;max-height:72vh;position:relative}
+
+/* Full grid: rows = time slots, cols = time-label + one per stage */
+.tl-table{display:grid;min-width:max-content;position:relative}
+
+/* Sticky header row (stage names) */
+.tl-head-row{display:contents}
+.tl-corner{
+  position:sticky;top:0;left:0;z-index:30;
+  background:var(--sand);
+  border-right:1.5px solid var(--border-strong);
+  border-bottom:1.5px solid var(--border-strong);
+  width:52px;height:52px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--ink-light);
+}
+.tl-stage-hdr{
+  position:sticky;top:0;z-index:20;
+  background:var(--sand);
+  border-bottom:1.5px solid var(--border-strong);
+  border-right:1px solid var(--border);
+  height:52px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:4px 4px;
+}
+.tl-stage-hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tl-stage-hdr-name{font-size:8px;font-weight:800;color:var(--ink);text-align:center;line-height:1.2;white-space:normal;word-break:break-word;}
+
+/* Time label cells (left column, sticky) */
+.tl-time-cell{
+  position:sticky;left:0;z-index:10;
+  width:52px;
+  background:var(--sand);
+  border-right:1.5px solid var(--border-strong);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:4px;
+  font-size:9px;font-weight:700;color:var(--ink-light);
+  white-space:nowrap;
+}
+/* Sunset indicator row */
+.tl-sunset-row .tl-time-cell{color:var(--amber)}
+.tl-sunset-row .tl-slot{border-top:2px solid rgba(200,134,26,.5)!important}
+
+/* Individual slot cells */
+.tl-slot{
+  position:relative;
+  border-bottom:1px solid rgba(26,18,8,.06);
+  border-right:1px solid rgba(26,18,8,.06);
+  min-width:90px;
+}
+/* 30-min half-hour line inside each hour slot */
+.tl-slot::after{
+  content:'';position:absolute;left:0;right:0;top:50%;
+  height:1px;background:rgba(26,18,8,.04);pointer-events:none;
+}
+
+/* Blocks are absolute inside the slot column, spanning rows via JS inline style */
+.tl-block{
+  position:absolute;left:2px;right:2px;
+  border-radius:6px;cursor:pointer;overflow:hidden;
+  border:2px solid transparent;
+  transition:filter .12s,transform .1s;
+  z-index:5;
+}
+.tl-block:active{transform:scale(.97)}
+.tl-block:hover{filter:brightness(1.08)}
+.tl-block.me-on{border-color:rgba(0,0,0,.22)}
+.tl-block.clash{box-shadow:0 0 0 2px #E84A4A}
 .tl-block-inner{padding:4px 6px;height:100%;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;gap:1px}
-.tl-block-name{font-size:10.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
-.tl-block-time{font-size:8.5px;font-weight:500;opacity:.82;white-space:nowrap;overflow:hidden;flex-shrink:0}
-/* crew avatars + conflict tag share the bottom row — no overlap */
+.tl-block-name{font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.tl-block-time{font-size:8px;font-weight:500;opacity:.82;white-space:nowrap;overflow:hidden;flex-shrink:0}
 .tl-block-bottom{display:flex;align-items:center;justify-content:space-between;gap:3px;overflow:hidden;flex-shrink:0;min-height:14px}
 .tl-block-avs{display:flex;gap:2px;overflow:hidden;align-items:center;flex:1;min-width:0}
 .tl-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;border:1px solid rgba(255,255,255,.5)}
-/* clash tag is now inline in the bottom row, not absolute */
 .clash-tag{background:#E84A4A;color:#fff;font-size:7px;font-weight:800;padding:2px 4px;border-radius:4px;line-height:1.2;white-space:nowrap;flex-shrink:0;pointer-events:none}
+
 .tl-legend{display:flex;gap:12px;padding:10px 16px;background:var(--sand);border-top:1px solid var(--border);font-size:11px;color:var(--ink-mid);flex-wrap:wrap;align-items:center}
 .tl-legend-item{display:flex;align-items:center;gap:5px;font-weight:500}
 .map-container{position:relative;background:#F5EDD0;overflow:hidden;user-select:none}
@@ -254,7 +305,7 @@ body{font-family:'Syne',sans-serif;background:var(--sand);color:var(--ink);min-h
     <div class="tl-day-tab"    data-tlday="Saturday">Saturday 18</div>
     <div class="tl-day-tab"    data-tlday="Sunday">Sunday 19</div>
   </div>
-  <div class="tl-outer"><div class="tl-container" id="tlCont"></div></div>
+  <div class="tl-outer"><div class="tl-table" id="tlCont"></div></div>
   <div class="tl-legend">
     <div class="tl-legend-item"><div style="width:12px;height:12px;border-radius:3px;background:#C84A2A;opacity:.4"></div>No picks</div>
     <div class="tl-legend-item"><div style="width:12px;height:12px;border-radius:3px;background:#C84A2A;opacity:.65"></div>Crew picked</div>
@@ -435,56 +486,125 @@ function rTimeline(){
   const allR=dd.map(a=>parseRange(a.t));
   const minT=Math.floor(Math.min(...allR.map(r=>r.s))/60)*60;
   const maxT=Math.ceil(Math.min(Math.max(...allR.map(r=>r.e)),1500)/60)*60;
-  const gW=Math.round((maxT-minT)*PPM);
+  const totalHrs=(maxT-minT)/60;
+
+  // Pixels per minute for vertical axis
+  const PPM_V=1.8; // px per minute → 60min row = 108px
+  const ROW_H=60*PPM_V; // height per hour row in px
+  const COL_W=100; // px per stage column
+
   const myList=me ? dd.filter(a=>gc(tlDay,a.a).includes(me)).map(a=>{ const r=parseRange(a.t); return{a:a.a,s:r.s,e:r.e}; }) : [];
   const hasConflict=a=>{ const r=parseRange(a.t); return myList.some(p=>p.a!==a.a&&r.s<p.e&&r.e>p.s); };
 
-  const sCol=document.createElement('div'); sCol.className='tl-stage-col';
-  const sHdr=document.createElement('div'); sHdr.className='tl-stage-hdr-cell'; sHdr.textContent='STAGE'; sCol.appendChild(sHdr);
-  stages.forEach(s=>{ const row=document.createElement('div'); row.className='tl-stage-row'; const dot=document.createElement('div'); dot.className='tl-stage-dot'; dot.style.background=SC[s]||'#888'; const nm=document.createElement('div'); nm.className='tl-stage-name'; nm.textContent=s; row.appendChild(dot); row.appendChild(nm); sCol.appendChild(row); });
-  cont.appendChild(sCol);
+  // Set CSS grid: col 0 = time labels (52px), then one col per stage
+  cont.style.gridTemplateColumns=`52px ${stages.map(()=>COL_W+'px').join(' ')}`;
+  cont.style.gridTemplateRows=`52px ${Array(totalHrs).fill(ROW_H+'px').join(' ')}`;
 
-  const grid=document.createElement('div'); grid.className='tl-grid'; grid.style.cssText=`width:${gW}px;position:relative`;
-  const thdr=document.createElement('div'); thdr.className='tl-time-hdr'; thdr.style.width=gW+'px';
-  for(let tt=minT;tt<=maxT;tt+=60){ const tick=document.createElement('div'); tick.className='tl-tick'; tick.style.left=Math.round((tt-minT)*PPM)+'px'; const sp=document.createElement('span'); sp.textContent=tlFmt(tt); tick.appendChild(sp); thdr.appendChild(tick); }
-  grid.appendChild(thdr);
+  // ── Row 0: header ─────────────────────────────
+  const corner=document.createElement('div'); corner.className='tl-corner'; corner.textContent='TIME';
+  cont.appendChild(corner);
+  stages.forEach(s=>{
+    const hdr=document.createElement('div'); hdr.className='tl-stage-hdr';
+    const dot=document.createElement('div'); dot.className='tl-stage-hdr-dot'; dot.style.background=SC[s]||'#888';
+    const nm=document.createElement('div'); nm.className='tl-stage-hdr-name'; nm.textContent=s;
+    hdr.appendChild(dot); hdr.appendChild(nm); cont.appendChild(hdr);
+  });
 
-  const rCont=document.createElement('div'); rCont.className='tl-rows'; rCont.style.cssText=`width:${gW}px;height:${stages.length*RH}px;position:relative`;
-  for(let tt=minT;tt<=maxT;tt+=60){ const vl=document.createElement('div'); vl.className='tl-vline hr'; vl.style.cssText=`position:absolute;top:0;bottom:0;left:${Math.round((tt-minT)*PPM)}px`; rCont.appendChild(vl); }
-  for(let tt=minT+30;tt<maxT;tt+=60){ const vl=document.createElement('div'); vl.className='tl-vline'; vl.style.cssText=`position:absolute;top:0;bottom:0;left:${Math.round((tt-minT)*PPM)}px`; rCont.appendChild(vl); }
-  if(SUNSET>=minT&&SUNSET<=maxT){ const sl=document.createElement('div'); sl.className='tl-sunset'; sl.style.cssText=`position:absolute;top:0;bottom:0;left:${Math.round((SUNSET-minT)*PPM)}px`; const slbl=document.createElement('div'); slbl.className='tl-sunset-lbl'; slbl.textContent='Sunset 7:12 PM'; sl.appendChild(slbl); rCont.appendChild(sl); }
-  stages.forEach((s,si)=>{ const bg=document.createElement('div'); bg.className='tl-row-bg'; bg.style.cssText=`position:absolute;left:0;right:0;top:${si*RH}px;height:${RH}px`; rCont.appendChild(bg); });
+  // ── Rows 1…N: one per hour ─────────────────────
+  // We need relative-positioned slot cells so blocks can be positioned inside them
+  // Strategy: render hour rows, place time label in col0, empty slot cells in stage cols.
+  // Then overlay blocks absolutely relative to the whole tl-outer scroll container
+  // — simpler: use a single absolute-positioned overlay div on top of the grid cells.
+
+  // Render grid rows (time labels + slot backgrounds)
+  for(let hi=0;hi<totalHrs;hi++){
+    const tt=minT+hi*60;
+    const isSunset=(tt<=SUNSET&&SUNSET<tt+60);
+
+    // Time label cell
+    const tcell=document.createElement('div');
+    tcell.className='tl-time-cell'+(isSunset?' tl-sunset-row':'');
+    tcell.textContent=tlFmt(tt);
+    cont.appendChild(tcell);
+
+    // Slot cells per stage
+    stages.forEach(()=>{
+      const slot=document.createElement('div');
+      slot.className='tl-slot'+(isSunset?' tl-sunset-row':'');
+      slot.style.height=ROW_H+'px';
+      cont.appendChild(slot);
+    });
+  }
+
+  // ── Overlay: absolute blocks per stage column ──
+  // We position an overlay div that sits on top of the grid (excluding header row)
+  // using CSS grid placement would be complex; instead use a simple absolute wrapper
+  // anchored to the tl-outer scroll container.
+  const overlay=document.createElement('div');
+  overlay.style.cssText=`position:absolute;top:52px;left:52px;pointer-events:none;`;
+  // each stage gets its own column div
   stages.forEach((s,si)=>{
+    const colDiv=document.createElement('div');
+    colDiv.style.cssText=`position:absolute;left:${si*COL_W}px;top:0;width:${COL_W}px;height:${totalHrs*ROW_H}px;pointer-events:none;`;
+
     dd.filter(a=>a.s===s).forEach(a=>{
-      const r=parseRange(a.t), ns=gc(tlDay,a.a), isMeOn=!!(me&&ns.includes(me)), isConf=isMeOn&&hasConflict(a), hasCrew=ns.length>0;
-      const left=Math.round((r.s-minT)*PPM), w=Math.max(Math.round((Math.min(r.e,maxT)-r.s)*PPM)-2,16);
-      const block=document.createElement('div'); block.className='tl-block'+(isMeOn?' me-on':'')+(isConf?' clash':'');
-      block.style.cssText=`position:absolute;left:${left}px;width:${w}px;top:${si*RH+4}px;height:${RH-8}px;`;
+      const r=parseRange(a.t);
+      const ns=gc(tlDay,a.a), isMeOn=!!(me&&ns.includes(me)), isConf=isMeOn&&hasConflict(a), hasCrew=ns.length>0;
+      const topPx=Math.round((r.s-minT)*PPM_V);
+      const heightPx=Math.max(Math.round((Math.min(r.e,maxT)-r.s)*PPM_V)-2, 24);
+
+      const block=document.createElement('div');
+      block.className='tl-block'+(isMeOn?' me-on':'')+(isConf?' clash':'');
+      block.style.cssText=`top:${topPx+1}px;height:${heightPx}px;pointer-events:auto;`;
       if(isMeOn){ block.style.background=SC[s]; block.style.color='#fff'; }
       else if(hasCrew){ block.style.background=SC[s]; block.style.color='#fff'; block.style.opacity='0.65'; }
       else{ block.style.background=SC_L[s]; block.style.color='#555'; block.style.opacity='0.45'; }
+
       const inner=document.createElement('div'); inner.className='tl-block-inner';
-      const topD=document.createElement('div');
       const nm2=document.createElement('div'); nm2.className='tl-block-name'; nm2.textContent=a.a;
-      const tm2=document.createElement('div'); tm2.className='tl-block-time'; tm2.textContent=a.t;
-      topD.appendChild(nm2); topD.appendChild(tm2); inner.appendChild(topD);
-      // bottom row: crew avatars on the left, conflict tag on the right — inline, never overlapping
-      if(ns.length || isConf){
+      inner.appendChild(nm2);
+      // Only show time label if block is tall enough
+      if(heightPx>32){
+        const tm2=document.createElement('div'); tm2.className='tl-block-time'; tm2.textContent=a.t;
+        inner.appendChild(tm2);
+      }
+      if((ns.length||isConf)&&heightPx>44){
         const bot=document.createElement('div'); bot.className='tl-block-bottom';
         if(ns.length){
           const avsD=document.createElement('div'); avsD.className='tl-block-avs';
-          ns.slice(0,5).forEach(n=>{ const c=gmc(n),av=document.createElement('div'); av.className='tl-av'; av.style.background=c.bg; av.style.color=c.fg; av.title=n; av.textContent=n[0].toUpperCase(); avsD.appendChild(av); });
+          ns.slice(0,4).forEach(n=>{ const c=gmc(n),av=document.createElement('div'); av.className='tl-av'; av.style.background=c.bg; av.style.color=c.fg; av.title=n; av.textContent=n[0].toUpperCase(); avsD.appendChild(av); });
           bot.appendChild(avsD);
         }
-        if(isConf){ const bn=document.createElement('div'); bn.className='clash-tag'; bn.textContent='⚠ CLASH'; bot.appendChild(bn); }
+        if(isConf){ const bn=document.createElement('div'); bn.className='clash-tag'; bn.textContent='⚠'; bot.appendChild(bn); }
         inner.appendChild(bot);
       }
       block.appendChild(inner);
       block.addEventListener('click', e=>{ e.stopPropagation(); tog(tlDay,a.a); });
-      rCont.appendChild(block);
+      colDiv.appendChild(block);
     });
+    overlay.appendChild(colDiv);
   });
-  grid.appendChild(rCont); cont.appendChild(grid);
+
+  // Sunset horizontal line inside overlay
+  if(SUNSET>=minT&&SUNSET<=maxT){
+    const sunY=Math.round((SUNSET-minT)*PPM_V);
+    const sunLine=document.createElement('div');
+    sunLine.style.cssText=`position:absolute;left:0;right:0;top:${sunY}px;height:2px;background:var(--amber);z-index:15;pointer-events:none;`;
+    const sunLbl=document.createElement('div');
+    sunLbl.style.cssText=`position:absolute;left:4px;top:${sunY+3}px;font-size:8px;font-weight:700;color:var(--amber);background:rgba(237,228,211,.92);padding:1px 5px;border-radius:3px;z-index:16;pointer-events:none;white-space:nowrap;`;
+    sunLbl.textContent='🌅 Sunset 7:12 PM';
+    overlay.appendChild(sunLine);
+    overlay.appendChild(sunLbl);
+  }
+
+  // Attach overlay to the scrollable outer (tl-outer), not inside grid
+  const outer=cont.closest('.tl-outer');
+  // Remove old overlay if re-rendering
+  outer.querySelectorAll('.tl-overlay').forEach(el=>el.remove());
+  overlay.classList.add('tl-overlay');
+  // tl-outer needs position:relative for absolute child
+  outer.style.position='relative';
+  outer.appendChild(overlay);
 }
 
 function rSum(){
