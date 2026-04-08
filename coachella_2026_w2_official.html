@@ -597,7 +597,7 @@ async function tog(day, art){
 function rMbar(){
   const el=$('mbar');
   if(!mbrs.length){ el.innerHTML='<span class="mbar-empty">No crew yet — set a room above</span>'; return; }
-  el.innerHTML=mbrs.map(m=>{ const c=C[m.i%C.length]; return `<div class="mpill${m.n===me?' me':''}}"><div class="mav" style="background:${c.bg};color:${c.fg}">${m.n[0].toUpperCase()}</div><span class="mn">${m.n}${m.n===me?'<span class="ytag">you</span>':''}</span></div>`; }).join('');
+  el.innerHTML=mbrs.map(m=>{ const c=C[m.i%C.length]; return `<div class="mpill${m.n===me?' me':''}"><div class="mav" style="background:${c.bg};color:${c.fg}">${m.n[0].toUpperCase()}</div><span class="mn">${m.n}${m.n===me?'<span class="ytag">you</span>':''}</span></div>`; }).join('');
 }
 
 function rSched(){
@@ -615,7 +615,7 @@ function rSched(){
       const hl=HEADLINERS.includes(a.a), ns=gc(cd,a.a), isMeOn=!!(me&&ns.includes(me));
       const card=document.createElement('div');
       card.className='acard'+(hl?' hl':'')+( isMeOn?' checked-me':'');
-      const avs=mbrs.length ? mbrs.map(m=>{ const on=ns.includes(m.n),c=C[m.i%C.length]; return `<div class="ck${on?' on':''}"${on?` style="background:${c.bg};border-color:${c.bg};color:${c.fg}"`:''}}>${m.n[0].toUpperCase()}</div>`; }).join('') : '';
+      const avs=mbrs.length ? mbrs.map(m=>{ const on=ns.includes(m.n),c=C[m.i%C.length]; return `<div class="ck${on?' on':''}"${on?` style="background:${c.bg};border-color:${c.bg};color:${c.fg}"`:''}>${m.n[0].toUpperCase()}</div>`; }).join('') : '';
       card.innerHTML=`<div class="acard-left">${hl?'<div class="hl-badge">★ Headliner</div>':''}<div class="acard-time">${a.t}</div><div class="acard-name">${a.a}</div>${a.g?`<div class="acard-genre">${a.g}</div>`:''}</div><div class="acard-checks">${avs}</div><div class="acard-cnt">${ns.length?ns.length+'/'+mbrs.length:''}</div><div class="plus-icon">${isMeOn?'✓':'+'}</div>`;
       card.addEventListener('click', ()=>tog(cd,a.a));
       el.appendChild(card);
@@ -624,7 +624,7 @@ function rSched(){
   const pad=document.createElement('div'); pad.className='bottom-pad'; el.appendChild(pad);
 }
 
-function tlFmt(m){ const h=Math.floor(m/60)%24,mi=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return `${hh}:${mi<10?'0':''}}${mi} ${ap}`; }
+function tlFmt(m){ const h=Math.floor(m/60)%24,mi=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return `${hh}:${mi<10?'0':''}${mi} ${ap}`; }
 
 function rTimeline(){
   const cont=$('tlCont'); cont.innerHTML='';
