@@ -547,15 +547,32 @@ function rTimeline(){
     const colDiv=document.createElement('div');
     colDiv.style.cssText=`position:absolute;left:${si*COL_W}px;top:0;width:${COL_W}px;height:${totalHrs*ROW_H}px;pointer-events:none;`;
 
-    dd.filter(a=>a.s===s).forEach(a=>{
-      const r=parseRange(a.t);
+    // ── Collision detection: group overlapping blocks, then split into sub-columns ──
+    const stageActs=dd.filter(a=>a.s===s).map(a=>({...a,r:parseRange(a.t)}));
+    // Assign each act a lane (sub-column index) and total lanes for that group
+    stageActs.forEach((a,i)=>{
+      const overlaps=stageActs.filter((b,j)=>j!==i&&b.r.s<a.r.e&&b.r.e>a.r.s);
+      a._lanes=overlaps.length+1;        // total parallel lanes needed
+      a._lane=0;
+      // pick the lowest lane not used by any overlapping act already assigned
+      const usedLanes=overlaps.filter(b=>b._lane!==undefined).map(b=>b._lane);
+      while(usedLanes.includes(a._lane)) a._lane++;
+    });
+
+    stageActs.forEach(a=>{
+      const r=a.r;
       const ns=gc(tlDay,a.a), isMeOn=!!(me&&ns.includes(me)), isConf=isMeOn&&hasConflict(a), hasCrew=ns.length>0;
       const topPx=Math.round((r.s-minT)*PPM_V);
       const heightPx=Math.max(Math.round((Math.min(r.e,maxT)-r.s)*PPM_V)-2, 24);
 
+      // Split column width among parallel lanes
+      const laneW=Math.floor((COL_W-4)/a._lanes);
+      const laneL=2+a._lane*laneW;
+
       const block=document.createElement('div');
       block.className='tl-block'+(isMeOn?' me-on':'')+(isConf?' clash':'');
-      block.style.cssText=`top:${topPx+1}px;height:${heightPx}px;pointer-events:auto;`;
+      // Override left/right with lane-specific values instead of the CSS defaults
+      block.style.cssText=`top:${topPx+1}px;height:${heightPx}px;pointer-events:auto;left:${laneL}px;right:${COL_W-(laneL+laneW)-2}px;`;
       if(isMeOn){ block.style.background=SC[s]; block.style.color='#fff'; }
       else if(hasCrew){ block.style.background=SC[s]; block.style.color='#fff'; block.style.opacity='0.65'; }
       else{ block.style.background=SC_L[s]; block.style.color='#555'; block.style.opacity='0.45'; }
@@ -581,7 +598,7 @@ function rTimeline(){
       block.appendChild(inner);
       block.addEventListener('click', e=>{ e.stopPropagation(); tog(tlDay,a.a); });
       colDiv.appendChild(block);
-    });
+    }); // end stageActs.forEach
     overlay.appendChild(colDiv);
   });
 
