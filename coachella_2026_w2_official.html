@@ -131,12 +131,15 @@ body{font-family:'Syne',sans-serif;background:var(--sand);color:var(--ink);min-h
 .tl-block:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .tl-block.me-on{border-color:rgba(0,0,0,.2)}
 .tl-block.clash{box-shadow:0 0 0 2.5px #E84A4A}
-.tl-block-inner{padding:4px 6px;height:100%;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
-.tl-block-name{font-size:10.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tl-block-time{font-size:8.5px;font-weight:500;opacity:.82;white-space:nowrap;overflow:hidden}
-.tl-block-avs{display:flex;gap:2px;overflow:hidden;align-items:center}
+.tl-block-inner{padding:4px 6px;height:100%;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;gap:1px}
+.tl-block-name{font-size:10.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.tl-block-time{font-size:8.5px;font-weight:500;opacity:.82;white-space:nowrap;overflow:hidden;flex-shrink:0}
+/* crew avatars + conflict tag share the bottom row — no overlap */
+.tl-block-bottom{display:flex;align-items:center;justify-content:space-between;gap:3px;overflow:hidden;flex-shrink:0;min-height:14px}
+.tl-block-avs{display:flex;gap:2px;overflow:hidden;align-items:center;flex:1;min-width:0}
 .tl-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;border:1px solid rgba(255,255,255,.5)}
-.clash-tag{background:#E84A4A;color:#fff;font-size:7px;font-weight:800;padding:2px 4px;border-radius:4px;position:absolute;bottom:4px;right:4px;z-index:2;line-height:1.2;white-space:nowrap;pointer-events:none}
+/* clash tag is now inline in the bottom row, not absolute */
+.clash-tag{background:#E84A4A;color:#fff;font-size:7px;font-weight:800;padding:2px 4px;border-radius:4px;line-height:1.2;white-space:nowrap;flex-shrink:0;pointer-events:none}
 .tl-legend{display:flex;gap:12px;padding:10px 16px;background:var(--sand);border-top:1px solid var(--border);font-size:11px;color:var(--ink-mid);flex-wrap:wrap;align-items:center}
 .tl-legend-item{display:flex;align-items:center;gap:5px;font-weight:500}
 .map-container{position:relative;background:#F5EDD0;overflow:hidden;user-select:none}
@@ -465,9 +468,18 @@ function rTimeline(){
       const nm2=document.createElement('div'); nm2.className='tl-block-name'; nm2.textContent=a.a;
       const tm2=document.createElement('div'); tm2.className='tl-block-time'; tm2.textContent=a.t;
       topD.appendChild(nm2); topD.appendChild(tm2); inner.appendChild(topD);
-      if(ns.length){ const avsD=document.createElement('div'); avsD.className='tl-block-avs'; ns.slice(0,5).forEach(n=>{ const c=gmc(n),av=document.createElement('div'); av.className='tl-av'; av.style.background=c.bg; av.style.color=c.fg; av.title=n; av.textContent=n[0].toUpperCase(); avsD.appendChild(av); }); inner.appendChild(avsD); }
+      // bottom row: crew avatars on the left, conflict tag on the right — inline, never overlapping
+      if(ns.length || isConf){
+        const bot=document.createElement('div'); bot.className='tl-block-bottom';
+        if(ns.length){
+          const avsD=document.createElement('div'); avsD.className='tl-block-avs';
+          ns.slice(0,5).forEach(n=>{ const c=gmc(n),av=document.createElement('div'); av.className='tl-av'; av.style.background=c.bg; av.style.color=c.fg; av.title=n; av.textContent=n[0].toUpperCase(); avsD.appendChild(av); });
+          bot.appendChild(avsD);
+        }
+        if(isConf){ const bn=document.createElement('div'); bn.className='clash-tag'; bn.textContent='⚠ CLASH'; bot.appendChild(bn); }
+        inner.appendChild(bot);
+      }
       block.appendChild(inner);
-      if(isConf){ const bn=document.createElement('div'); bn.className='clash-tag'; bn.textContent='⚠ CONFLICT'; block.appendChild(bn); }
       block.addEventListener('click', e=>{ e.stopPropagation(); tog(tlDay,a.a); });
       rCont.appendChild(block);
     });
