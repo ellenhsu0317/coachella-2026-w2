@@ -419,11 +419,14 @@ async function doJoin(){
 }
 
 async function doJoin2(){
-  const n = $('nIn2').value.trim(); if(!n) return;
-  me = n; localStorage.setItem('coa26w2_name', me);
+  const n=$('nIn2').value.trim(); if(!n) return;
+  me=n;
+  localStorage.setItem('coa26w2_name', me);
+  // Add to members if not already present (e.g. rejoining after deletion)
   if(!mbrs.find(m=>m.n===me)){ mbrs.push({n:me,i:mbrs.length}); await sv(); }
-  $('jr').style.display = 'none';
-  rAll(); toast(`Welcome back, ${me}! 🌵`);
+  $('jr').style.display='none';
+  rAll();
+  toast(`Welcome, ${me}! 🌵`);
 }
 
 function showRoomInput(){
@@ -691,16 +694,32 @@ document.addEventListener('click', e=>{ if(!e.target.closest('.stage-dropdown-wr
 (async()=>{
   const savedRoom=localStorage.getItem('coa26w2_room');
   const savedName=localStorage.getItem('coa26w2_name');
+
   if(savedRoom){
+    // Room already set — restore it
     rid=savedRoom;
     $('rCode').textContent=rid;
     $('changeRoomBtn').style.display='inline-block';
     $('roomSetupRow').style.display='none';
-    startListen(); await ld();
+
+    // Load latest data from Firebase first
+    startListen();
+    await ld();
+
     if(savedName && mbrs.find(m=>m.n===savedName)){
-      me=savedName; $('jr').style.display='none'; rAll(); toast(`Welcome back, ${me}! 🌵`);
+      // Happy path: member still exists in room
+      me=savedName;
+      $('jr').style.display='none';
+      rAll();
+      toast(`Welcome back, ${me}! 🌵`);
     } else {
-      $('jr').style.display='flex'; rSched(); rSum();
+      // Member was deleted from Firebase (or never joined) —
+      // clear stale local name and show the re-join card
+      localStorage.removeItem('coa26w2_name');
+      $('jr').style.display='flex';
+      $('nIn2').value='';
+      $('nIn2').focus();
+      rSched(); rSum();
     }
   } else {
     rSched(); rSum();
